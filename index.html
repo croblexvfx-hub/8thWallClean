@@ -5,48 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mi AR Profesional Replicable</title>
 
-  <!-- 1. El motor 3D interactivo -->
+  <!-- 1. Cargamos A-Frame -->
   <script src="https://aframe.io"></script>
 
-  <!-- 2. Los motores de arranque locales obligatorios de 8th Wall -->
+  <!-- 2. El único motor de arranque real que tienes en tu carpeta -->
   <script crossorigin="anonymous" src="./external/runtime/runtime.js"></script>
-  <script crossorigin="anonymous" src="./external/xr/xr.js" defer></script>
-
-  <script>
-    // 3. Activación del motor usando tu archivo marker.json local
-    window.addEventListener('xrloaded', () => {
-      XR8.XrController.configure({
-        imageTargetData: [
-          {
-            name: "Marcador_Profesional_Cliente",
-            type: "planar",
-            imagePath: "image-targets/marker.png",
-            properties: {
-              top: 0,
-              left: 0,
-              width: 1875,
-              height: 2500,
-              isRotated: false,
-              originalWidth: 1875,
-              originalHeight: 2500
-            }
-          }
-        ]
-      })
-    })
-  </script>
 </head>
 
 <body>
-  <!-- Escena AR optimizada -->
-  <a-scene xrweb="disableWorldTracking: true">
+  <!-- 3. Activamos el motor indicando la ruta de tu imagen de la pizza -->
+  <a-scene xrweb="imageTargets: Marcador_Profesional_Cliente; disableWorldTracking: true">
     
     <a-assets>
-      <!-- Tu modelo 3D dentro de tu carpeta assets/ -->
       <a-asset-item id="modelo-pizza" src="assets/Plato_05.glb"></a-asset-item>
     </a-assets>
 
-    <!-- El Marcador vinculado al nombre del código -->
+    <!-- 4. Vinculamos el objeto 3D al marcador -->
     
       
     
