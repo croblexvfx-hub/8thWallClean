@@ -1,0 +1,9 @@
+[
+  {
+    "id": "Marcador_Profesional_Cliente",
+    "name": "Marcador_Profesional_Cliente",
+    "type": "planar",
+    "url": "image-targets/marker.png",
+    "metadata": "image-targets/marker.json"
+  }
+]
