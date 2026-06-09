@@ -8,17 +8,17 @@
   <!-- 1. Cargamos A-Frame (El motor 3D interactivo) -->
   <script src="https://aframe.io"></script>
 
-  <!-- 2. Cargamos el motor de 8th Wall (Desde el mismo servidor de tu proyecto de éxito) -->
+  <!-- 2. Cargamos el motor de 8th Wall (Desde el mismo servidor de tu proyecto de Ã©xito) -->
   <script src="https://cdn.jsdelivr.net/npm/@8thwall/engine-binary@1/dist/xr.js" crossorigin="anonymous"></script>
 
   <script>
-    // 3. El código mínimo para activar tu marcador sin SLAM (Evita que el 3D flote por el suelo)
+    // 3. ActivaciÃ³n nativa del marcador sin funciones de servidor
     AFRAME.registerComponent('configurar-motor', {
       init: function () {
         this.el.sceneEl.addEventListener('realityready', () => {
           XR8.XrController.configure({
-            // Aquí le decimos al motor el archivo de datos de tu pastelito
-            imageTargetData: [require('./marker.json')] 
+            // Le indicamos el nombre del marcador directamente para que lo busque en el manifest
+            imageTargets: ['Marcador_Profesional_Cliente']
           })
         })
       }
@@ -37,11 +37,11 @@
 
     <!-- 5. El Marcador: Vinculamos el 3D al nombre exacto de tu imagen -->
     
-      <!-- Todo lo que esté aquí dentro aparecerá sobre el pastelito -->
+      <!-- Todo lo que estÃ© aquÃ­ dentro aparecerÃ¡ sobre el pastelito -->
       
     
 
-    <!-- 6. La Cámara obligatoria de 8th Wall -->
+    <!-- 6. La CÃ¡mara obligatoria de 8th Wall -->
     <a-camera camera3d></a-camera>
   </a-scene>
 </body>
