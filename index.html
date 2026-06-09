@@ -5,20 +5,35 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mi AR Profesional Replicable</title>
 
-  <!-- 1. Cargamos A-Frame (El motor 3D interactivo) -->
+  <!-- 1. Motor 3D interactivo -->
   <script src="https://aframe.io"></script>
 
-  <!-- 2. Cargamos el motor de 8th Wall (Desde el mismo servidor de tu proyecto de éxito) -->
-  <script src="https://cdn.jsdelivr.net/npm/@8thwall/engine-binary@1/dist/xr.js" crossorigin="anonymous"></script>
+  <!-- 2. Motor de Realidad Aumentada de 8th Wall (CDN Oficial) -->
+  <script src="https://jsdelivr.net" crossorigin="anonymous"></script>
 
   <script>
-    // 3. Activación nativa del marcador sin funciones de servidor
+    // 3. Inyectamos los datos del marcador directamente en el motor sin usar require ni archivos externos
     AFRAME.registerComponent('configurar-motor', {
       init: function () {
         this.el.sceneEl.addEventListener('realityready', () => {
           XR8.XrController.configure({
-            // Le indicamos el nombre del marcador directamente para que lo busque en el manifest
-            imageTargets: ['Marcador_Profesional_Cliente']
+            imageTargetData: [
+              {
+                name: "Marcador_Profesional_Cliente",
+                type: "planar",
+                // Le pasamos la ruta de la imagen física que el móvil procesará en vivo
+                imagePath: "image-targets/marker.png",
+                properties: {
+                  top: 0,
+                  left: 0,
+                  width: 1875,
+                  height: 2500,
+                  isRotated: false,
+                  originalWidth: 1875,
+                  originalHeight: 2500
+                }
+              }
+            ]
           })
         })
       }
@@ -27,21 +42,21 @@
 </head>
 
 <body>
-  <!-- 4. La Escena AR (Desactivamos SLAM para rendimiento extremo) -->
+  <!-- Escena AR interactiva con el componente limpio -->
   <a-scene configurar-motor xrweb="disableWorldTracking: true">
     
     <a-assets>
-      <!-- Tu modelo 3D de la pizza o el plato -->
-      <a-asset-item id="modelo-pizza" src="./Plato_05.glb"></a-asset-item>
+      <!-- Tu modelo 3D dentro de tu carpeta assets/ -->
+      <a-asset-item id="modelo-pizza" src="assets/Plato_05.glb"></a-asset-item>
     </a-assets>
 
-    <!-- 5. El Marcador: Vinculamos el 3D al nombre exacto de tu imagen -->
+    <!-- El Marcador: Vinculamos el 3D al nombre que configuramos arriba -->
     
-      <!-- Todo lo que esté aquí dentro aparecerá sobre el pastelito -->
+      <!-- Tu modelo de la pizza aparecerá flotando aquí encima -->
       
     
 
-    <!-- 6. La Cámara obligatoria de 8th Wall -->
+    <!-- La Cámara obligatoria de 8th Wall -->
     <a-camera camera3d></a-camera>
   </a-scene>
 </body>
