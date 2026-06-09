@@ -5,58 +5,52 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mi AR Profesional Replicable</title>
 
-  <!-- 1. Motor 3D interactivo -->
+  <!-- 1. El motor 3D interactivo -->
   <script src="https://aframe.io"></script>
 
-  <!-- 2. Motor de Realidad Aumentada de 8th Wall (CDN Oficial) -->
-  <script src="https://jsdelivr.net" crossorigin="anonymous"></script>
+  <!-- 2. Los motores de arranque locales obligatorios de 8th Wall -->
+  <script crossorigin="anonymous" src="./external/runtime/runtime.js"></script>
+  <script crossorigin="anonymous" src="./external/xr/xr.js" defer></script>
 
   <script>
-    // 3. Inyectamos los datos del marcador directamente en el motor sin usar require ni archivos externos
-    AFRAME.registerComponent('configurar-motor', {
-      init: function () {
-        this.el.sceneEl.addEventListener('realityready', () => {
-          XR8.XrController.configure({
-            imageTargetData: [
-              {
-                name: "Marcador_Profesional_Cliente",
-                type: "planar",
-                // Le pasamos la ruta de la imagen física que el móvil procesará en vivo
-                imagePath: "image-targets/marker.png",
-                properties: {
-                  top: 0,
-                  left: 0,
-                  width: 1875,
-                  height: 2500,
-                  isRotated: false,
-                  originalWidth: 1875,
-                  originalHeight: 2500
-                }
-              }
-            ]
-          })
-        })
-      }
+    // 3. Activación del motor usando tu archivo marker.json local
+    window.addEventListener('xrloaded', () => {
+      XR8.XrController.configure({
+        imageTargetData: [
+          {
+            name: "Marcador_Profesional_Cliente",
+            type: "planar",
+            imagePath: "image-targets/marker.png",
+            properties: {
+              top: 0,
+              left: 0,
+              width: 1875,
+              height: 2500,
+              isRotated: false,
+              originalWidth: 1875,
+              originalHeight: 2500
+            }
+          }
+        ]
+      })
     })
   </script>
 </head>
 
 <body>
-  <!-- Escena AR interactiva con el componente limpio -->
-  <a-scene configurar-motor xrweb="disableWorldTracking: true">
+  <!-- Escena AR optimizada -->
+  <a-scene xrweb="disableWorldTracking: true">
     
     <a-assets>
       <!-- Tu modelo 3D dentro de tu carpeta assets/ -->
       <a-asset-item id="modelo-pizza" src="assets/Plato_05.glb"></a-asset-item>
     </a-assets>
 
-    <!-- El Marcador: Vinculamos el 3D al nombre que configuramos arriba -->
+    <!-- El Marcador vinculado al nombre del código -->
     
-      <!-- Tu modelo de la pizza aparecerá flotando aquí encima -->
       
     
 
-    <!-- La Cámara obligatoria de 8th Wall -->
     <a-camera camera3d></a-camera>
   </a-scene>
 </body>
