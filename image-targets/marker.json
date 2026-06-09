@@ -1,0 +1,25 @@
+{
+  "imagePath": "image-targets/marker.png",
+  "resources": {
+    "originalImage": "marker.png",
+    "croppedImage": "marker.png",
+    "thumbnailImage": "marker.png",
+    "geometryImage": "marker.png",
+    "luminanceImage": "marker.png"
+  },
+  "name": "Marcador_Profesional_Cliente",
+  "type": "PLANAR",
+  "properties": {
+    "top": 0,
+    "left": 0,
+    "width": 1000,
+    "height": 1000,
+    "isRotated": false,
+    "originalWidth": 1875,
+    "originalHeight": 2500
+  },
+  "userMetadataIsJson": true,
+  "loadAutomatically": true,
+  "created": 1744147968791,
+  "updated": 1744322360354
+}

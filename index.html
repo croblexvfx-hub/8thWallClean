@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi AR Profesional Replicable</title>
+
+  <!-- 1. Cargamos A-Frame (El motor 3D interactivo) -->
+  <script src="https://aframe.io"></script>
+
+  <!-- 2. Cargamos el motor de 8th Wall (Desde el mismo servidor de tu proyecto de éxito) -->
+  <script src="https://cdn.jsdelivr.net/npm/@8thwall/engine-binary@1/dist/xr.js" crossorigin="anonymous"></script>
+
+  <script>
+    // 3. El código mínimo para activar tu marcador sin SLAM (Evita que el 3D flote por el suelo)
+    AFRAME.registerComponent('configurar-motor', {
+      init: function () {
+        this.el.sceneEl.addEventListener('realityready', () => {
+          XR8.XrController.configure({
+            // Aquí le decimos al motor el archivo de datos de tu pastelito
+            imageTargetData: [require('./marker.json')] 
+          })
+        })
+      }
+    })
+  </script>
+</head>
+
+<body>
+  <!-- 4. La Escena AR (Desactivamos SLAM para rendimiento extremo) -->
+  <a-scene configurar-motor xrweb="disableWorldTracking: true">
+    
+    <a-assets>
+      <!-- Tu modelo 3D de la pizza o el plato -->
+      <a-asset-item id="modelo-pizza" src="./Plato_05.glb"></a-asset-item>
+    </a-assets>
+
+    <!-- 5. El Marcador: Vinculamos el 3D al nombre exacto de tu imagen -->
+    
+      <!-- Todo lo que esté aquí dentro aparecerá sobre el pastelito -->
+      
+    
+
+    <!-- 6. La Cámara obligatoria de 8th Wall -->
+    <a-camera camera3d></a-camera>
+  </a-scene>
+</body>
+</html>
