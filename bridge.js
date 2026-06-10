@@ -1,4 +1,4 @@
-const BRIDGE_VERSION = "v80.3";
+const BRIDGE_VERSION = "Bridge v80.3";
 const panel = document.createElement("div");
 
 panel.style.position = "fixed";
