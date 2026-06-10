@@ -1,4 +1,4 @@
-const BRIDGE_VERSION = "v80.1";
+const BRIDGE_VERSION = "v80.2";
 const panel = document.createElement("div");
 
 panel.style.position = "fixed";
@@ -18,3 +18,9 @@ panel.textContent =
     "bridge.js cargado";
 
 document.body.appendChild(panel);
+
+setInterval(() => {
+    panel.textContent =
+        "v80.2\n\n" +
+        "XR8: " + (window.XR8 ? "SI" : "NO");
+}, 500);
