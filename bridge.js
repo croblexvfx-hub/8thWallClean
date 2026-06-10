@@ -1,4 +1,17 @@
-const BRIDGE_VERSION = "Bridge v80.8";
+const BRIDGE_VERSION = "Bridge v80.9";
+const INSPECT = [
+    { nombre: "XR8", objeto: () => window.XR8 },
+    { nombre: "XR8.XrController", objeto: () => window.XR8?.XrController },
+    { nombre: "XR8.Threejs", objeto: () => window.XR8?.Threejs },
+    { nombre: "XR8.CameraPixelArray", objeto: () => window.XR8?.CameraPixelArray },
+    { nombre: "XR8.GlTextureRenderer", objeto: () => window.XR8?.GlTextureRenderer },
+    { nombre: "XR8.Platform", objeto: () => window.XR8?.Platform },
+    { nombre: "XR8.XrConfig", objeto: () => window.XR8?.XrConfig },
+    { nombre: "XR8.XrDevice", objeto: () => window.XR8?.XrDevice },
+    { nombre: "XR8.Vps", objeto: () => window.XR8?.Vps },
+];
+
+let inspectIndex = 0;
 const panel = document.createElement("div");
 
 panel.style.position = "fixed";
@@ -18,18 +31,41 @@ panel.textContent =
     "bridge.js cargado";
 
 document.body.appendChild(panel);
+panel.style.cursor = "pointer";
+
+panel.onclick = () => {
+    inspectIndex++;
+    if (inspectIndex >= INSPECT.length) inspectIndex = 0;
+};
 
 setInterval(() => {
 
     let texto = BRIDGE_VERSION + "\n\n";
 
-    if (!window.XR8) {
-        texto += "XR8: NO";
-    } else {
-        texto += "XR8: SI\n\n";
-        texto += Object.keys(window.XR8).join("\n");
+    const actual = INSPECT[inspectIndex];
+
+    texto += actual.nombre + "\n\n";
+
+    try {
+
+        const obj = actual.objeto();
+
+        if (!obj) {
+
+            texto += "(null)";
+
+        } else {
+
+            texto += Object.keys(obj).join("\n");
+
+        }
+
+    } catch (e) {
+
+        texto += "ERROR";
+
     }
 
     panel.textContent = texto;
 
-}, 500);
+}, 250);
