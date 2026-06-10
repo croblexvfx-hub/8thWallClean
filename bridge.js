@@ -1,8 +1,8 @@
-const BRIDGE_VERSION = "v80.2";
+const BRIDGE_VERSION = "v80.3";
 const panel = document.createElement("div");
 
 panel.style.position = "fixed";
-panel.style.top = "10px";
+panel.style.top = "20px";
 panel.style.left = "10px";
 panel.style.background = "rgba(0,0,0,0.7)";
 panel.style.color = "lime";
