@@ -1,4 +1,4 @@
-const BRIDGE_VERSION = "Bridge v80.4";
+const BRIDGE_VERSION = "Bridge v80.5";
 const panel = document.createElement("div");
 
 panel.style.position = "fixed";
@@ -21,6 +21,7 @@ document.body.appendChild(panel);
 
 setInterval(() => {
     panel.textContent =
-        "v80.2\n\n" +
-        "XR8: " + (window.XR8 ? "SI" : "NO");
+    BRIDGE_VERSION +
+    "\n\n" +
+    "XR8: " + (window.XR8 ? "SI" : "NO");
 }, 500);
