@@ -1,3 +1,4 @@
+const BRIDGE_VERSION = "v80.1";
 const panel = document.createElement("div");
 
 panel.style.position = "fixed";
@@ -11,6 +12,9 @@ panel.style.fontSize = "14px";
 panel.style.zIndex = "999999";
 panel.style.whiteSpace = "pre";
 
-panel.textContent = "bridge.js cargado";
+panel.textContent =
+    BRIDGE_VERSION +
+    "\n" +
+    "bridge.js cargado";
 
 document.body.appendChild(panel);
