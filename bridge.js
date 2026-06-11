@@ -1,4 +1,4 @@
-const BRIDGE_VERSION = "Bridge v81.4";
+const BRIDGE_VERSION = "Bridge v81.5";
 const INSPECT = [
     { nombre: "XR8", objeto: () => window.XR8 },
     { nombre: "XR8.XrController", objeto: () => window.XR8?.XrController },
@@ -106,9 +106,39 @@ panel.onclick = () => {
                 panel.textContent = BRIDGE_VERSION + "\n\nonProcessCpu";
             },
 
-            onProcessGpu() {
-                panel.textContent = BRIDGE_VERSION + "\n\nonProcessGpu";
-            }
+            onProcessGpu(...args) {
+
+    let texto =
+        BRIDGE_VERSION +
+        "\n\nonProcessGpu\n\n";
+
+    texto += "args = " + args.length + "\n\n";
+
+    for (let i = 0; i < args.length; i++) {
+
+        texto +=
+            "[" + i + "] " +
+            typeof args[i] +
+            "\n";
+
+        try {
+
+            texto +=
+                Object.keys(args[i]).join(", ") +
+                "\n\n";
+
+        } catch (e) {
+
+            texto +=
+                "(sin keys)\n\n";
+
+        }
+
+    }
+
+    panel.textContent = texto;
+
+}
 
         });
 
