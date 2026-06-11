@@ -1,4 +1,4 @@
-const BRIDGE_VERSION = "Bridge v82.0";
+const BRIDGE_VERSION = "Bridge v82.1";
 
 let modo = 0;
 
@@ -12,11 +12,8 @@ panel.style.color = "lime";
 panel.style.padding = "10px";
 panel.style.fontFamily = "monospace";
 panel.style.fontSize = "14px";
-panel.style.zIndex = "999999";
 panel.style.whiteSpace = "pre";
-panel.style.maxWidth = "95vw";
-panel.style.maxHeight = "95vh";
-panel.style.overflow = "hidden";
+panel.style.zIndex = "999999";
 
 document.body.appendChild(panel);
 
@@ -24,7 +21,7 @@ panel.onclick = () => {
 
     modo++;
 
-    if (modo > 4) modo = 0;
+    if (modo > 2) modo = 0;
 
 };
 
@@ -34,166 +31,54 @@ function registrarBridge() {
 
         name: "bridge-test",
 
-        onProcessGpu(...args) {
+        onProcessGpu(args) {
 
-            const encontrados = [];
+            let texto =
+                BRIDGE_VERSION +
+                "\n\nModo " + modo + "\n\n";
 
-            function explorar(obj, ruta, nivel) {
+            if (!args) {
 
-                if (nivel > 6) return;
+                panel.textContent = texto + "Sin args";
+                return;
 
-                if (!obj) return;
+            }
 
-                if (typeof obj !== "object") return;
+            if (modo === 0) {
 
-                for (const k in obj) {
+                texto += Object.keys(args).join("\n");
 
-                    let v;
+            }
 
-                    try {
+            if (modo === 1) {
 
-                        v = obj[k];
+                if (args.frameStartResult) {
 
-                    } catch {
+                    texto += Object.keys(args.frameStartResult).join("\n");
 
-                        continue;
+                } else {
 
-                    }
-
-                    const r = ruta + "." + k;
-
-                    if (modo === 0) {
-
-                        if (
-                            Array.isArray(v) && v.length === 16 ||
-                            v instanceof Float32Array && v.length === 16
-                        ) {
-
-                            encontrados.push(r);
-
-                        }
-
-                    }
-
-                    if (modo === 1) {
-
-                        if (
-                            v &&
-                            typeof v === "object" &&
-                            "x" in v &&
-                            "y" in v &&
-                            "z" in v
-                        ) {
-
-                            encontrados.push(r);
-
-                        }
-
-                    }
-
-                    if (modo === 2) {
-
-                        const n = k.toLowerCase();
-
-                        if (
-                            n.includes("pose") ||
-                            n.includes("matrix") ||
-                            n.includes("camera") ||
-                            n.includes("tracking") ||
-                            n.includes("target") ||
-                            n.includes("projection") ||
-                            n.includes("view") ||
-                            n.includes("world") ||
-                            n.includes("transform")
-                        ) {
-
-                            encontrados.push(r);
-
-                        }
-
-                    }
-
-                    if (modo === 3) {
-
-                        if (typeof v === "number") {
-
-                            encontrados.push(r + " = " + v);
-
-                        }
-
-                    }
-
-                    if (modo === 4) {
-
-                        encontrados.push(r);
-
-                    }
-
-                    explorar(v, r, nivel + 1);
+                    texto += "Sin frameStartResult";
 
                 }
 
             }
 
-            explorar(args[0], "ARGS", 0);
+            if (modo === 2) {
 
-            explorar(window.XR8, "XR8", 0);
+                if (args.frameworkStartResult) {
 
-            try {
+                    texto += Object.keys(args.frameworkStartResult).join("\n");
 
-                explorar(
-                    XR8.XrController,
-                    "XR8.XrController",
-                    0
-                );
+                } else {
 
-            } catch {}
+                    texto += "Sin frameworkStartResult";
 
-            try {
+                }
 
-                explorar(
-                    XR8.Threejs,
-                    "XR8.Threejs",
-                    0
-                );
+            }
 
-            } catch {}
-
-            try {
-
-                explorar(
-                    XR8.XrController.pipelineModule(),
-                    "XR8.XrController.pipelineModule()",
-                    0
-                );
-
-            } catch {}
-
-            try {
-
-                explorar(
-                    XR8.Threejs.pipelineModule(),
-                    "XR8.Threejs.pipelineModule()",
-                    0
-                );
-
-            } catch {}
-
-            try {
-
-                explorar(
-                    XR8.CameraPixelArray.pipelineModule(),
-                    "XR8.CameraPixelArray.pipelineModule()",
-                    0
-                );
-
-            } catch {}
-
-            panel.textContent =
-                BRIDGE_VERSION +
-                "\n\nModo " + modo +
-                "\n\n" +
-                encontrados.slice(0, 120).join("\n");
+            panel.textContent = texto;
 
         }
 
