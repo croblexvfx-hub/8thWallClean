@@ -1,4 +1,4 @@
-const BRIDGE_VERSION = "Bridge v81.0";
+const BRIDGE_VERSION = "Bridge v81.1";
 const INSPECT = [
     { nombre: "XR8", objeto: () => window.XR8 },
     { nombre: "XR8.XrController", objeto: () => window.XR8?.XrController },
@@ -59,7 +59,13 @@ setInterval(() => {
 
         } else {
 
-            texto += Object.keys(obj).join("\n");
+            texto += "Tipo: " + typeof obj + "\n\n";
+
+if (typeof obj === "function") {
+    texto += obj.toString().substring(0, 500);
+} else {
+    texto += Object.keys(obj).join("\n");
+}
 
         }
 
