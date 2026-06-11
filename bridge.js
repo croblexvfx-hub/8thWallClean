@@ -1,4 +1,4 @@
-const BRIDGE_VERSION = "Bridge v81.11";
+const BRIDGE_VERSION = "Bridge v81.12";
 
 const panel = document.createElement("div");
 
@@ -21,26 +21,6 @@ panel.textContent =
 document.body.appendChild(panel);
 function registrarBridge() {
 
-    try {
-
-    const pm = XR8.XrController.pipelineModule();
-
-    panel.textContent =
-        BRIDGE_VERSION +
-        "\n\n" +
-       "typeof: " + typeof pm +
-"\n\n" +
-(pm.toString ? pm.toString().substring(0,500) : "sin toString");
-
-} catch (e) {
-
-    panel.textContent =
-        BRIDGE_VERSION +
-        "\n\nERROR\n" +
-        e.message;
-
-}
-    return;
 
     XR8.addCameraPipelineModule({
 
@@ -100,27 +80,70 @@ function registrarBridge() {
 
         onProcessGpu(...args) {
 
-    let texto =
-        BRIDGE_VERSION +
-        "\n\nonProcessGpu\n\n";
+            const encontrados = [];
 
-    texto += "args = " + args.length;
+function explorar(obj, ruta, nivel) {
 
-    if (args.length > 0) {
+    if (nivel > 5) return;
 
-        texto += "\n\n";
+    if (!obj) return;
+
+    if (typeof obj !== "object") return;
+
+    for (const k in obj) {
+
+        let v;
 
         try {
 
-            texto += Object.keys(args[0]).join("\n");
+            v = obj[k];
 
         } catch {
 
-            texto += "ERROR";
+            continue;
 
         }
 
-    }
+        const r = ruta + "." + k;
+
+        if (Array.isArray(v) && v.length === 16) {
+
+            encontrados.push(r + " = Array16");
+
+        }
+
+        if (v instanceof Float32Array && v.length === 16) {
+
+            encontrados.push(r + " = Float32Array16");
+
+        }
+
+        if (
+            v &&
+            typeof v === "object" &&
+            "x" in v &&
+            "y" in v &&
+            "z" in v
+        ) {
+
+            encontrados.push(r + " = xyz");
+
+        }
+
+        explorar(v, r, nivel + 1);
+
+        }
+
+        }
+
+        explorar(args[0], "root", 0);
+
+        panel.textContent =
+            BRIDGE_VERSION +
+            "\n\n" +
+            encontrados.join("\n");
+            
+        }
 
     panel.textContent = texto;
 
