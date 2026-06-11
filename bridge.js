@@ -1,4 +1,6 @@
-const BRIDGE_VERSION = "Bridge v81.14";
+const BRIDGE_VERSION = "Bridge v81.15";
+
+let modo = 0;
 
 const panel = document.createElement("div");
 
@@ -19,6 +21,15 @@ panel.textContent =
     "bridge.js cargado";
 
 document.body.appendChild(panel);
+
+panel.onclick = () => {
+
+    modo++;
+
+    if (modo > 4) modo = 0;
+
+};
+
 function registrarBridge() {
 
 
@@ -26,30 +37,14 @@ function registrarBridge() {
 
         name: "bridge-test",
 
-        onStart() {
-            panel.textContent =
-                BRIDGE_VERSION +
-                "\n\nonStart";
-        },
+        onStart() {}
 
-        onAttach() {
-            panel.textContent =
-                BRIDGE_VERSION +
-                "\n\nonAttach";
-        },
+        onAttach() {}
 
-        onDetach() {
-            panel.textContent =
-                BRIDGE_VERSION +
-                "\n\nonDetach";
-        },
+        onDetach() {}
 
-        onUpdate() {
-            panel.textContent =
-                BRIDGE_VERSION +
-                "\n\nonUpdate";
-        },
-
+        onUpdate() {}
+        
         onProcessCpu(...args) {
 
     let texto =
@@ -80,70 +75,94 @@ function registrarBridge() {
 
         onProcessGpu(...args) {
 
-            const encontrados = [];
+    const encontrados = [];
 
-function explorar(obj, ruta, nivel) {
+    function explorar(obj, ruta, nivel) {
 
-    if (nivel > 5) return;
+        if (nivel > 6) return;
+        if (!obj) return;
+        if (typeof obj !== "object") return;
 
-    if (!obj) return;
+        for (const k in obj) {
 
-    if (typeof obj !== "object") return;
+            let v;
 
-    for (const k in obj) {
+            try {
 
-        let v;
+                v = obj[k];
 
-        try {
+            } catch {
 
-            v = obj[k];
+                continue;
 
-        } catch {
+            }
 
-            continue;
+            const r = ruta + "." + k;
+
+            if (modo === 0) {
+
+                encontrados.push(r);
+
+            }
+
+            if (modo === 1) {
+
+                if (Array.isArray(v) && v.length === 16)
+                    encontrados.push(r + " Array16");
+
+                if (v instanceof Float32Array && v.length === 16)
+                    encontrados.push(r + " Float32Array16");
+
+                if (
+                    v &&
+                    typeof v === "object" &&
+                    "x" in v &&
+                    "y" in v &&
+                    "z" in v
+                )
+                    encontrados.push(r + " xyz");
+
+            }
+
+            if (modo === 2) {
+
+                const nombre = k.toLowerCase();
+
+                if (
+                    nombre.includes("pose") ||
+                    nombre.includes("matrix") ||
+                    nombre.includes("camera") ||
+                    nombre.includes("tracking") ||
+                    nombre.includes("transform") ||
+                    nombre.includes("world") ||
+                    nombre.includes("view") ||
+                    nombre.includes("projection") ||
+                    nombre.includes("target")
+                ) {
+
+                    encontrados.push(r);
+
+                }
+
+            }
+
+            explorar(v, r, nivel + 1);
 
         }
 
-        const r = ruta + "." + k;
+    }
 
-        if (Array.isArray(v) && v.length === 16) {
+    explorar(args[0], "ARGS", 0);
 
-            encontrados.push(r + " = Array16");
+    explorar(window.XR8, "XR8", 0);
 
-        }
+    panel.textContent =
+        BRIDGE_VERSION +
+        "\nModo " + modo +
+        "\n\n" +
+        encontrados.slice(0, 80).join("\n");
 
-        if (v instanceof Float32Array && v.length === 16) {
-
-            encontrados.push(r + " = Float32Array16");
-
-        }
-
-        if (
-            v &&
-            typeof v === "object" &&
-            "x" in v &&
-            "y" in v &&
-            "z" in v
-        ) {
-
-            encontrados.push(r + " = xyz");
-
-        }
-
-        explorar(v, r, nivel + 1);
-
-        }
-
-        }
-
-        explorar(args[0], "root", 0);
-
-        panel.textContent =
-            BRIDGE_VERSION +
-            "\n\n" +
-            encontrados.join("\n");
-            
-        }
+}
 
        });
 
