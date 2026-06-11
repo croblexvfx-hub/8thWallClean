@@ -1,6 +1,4 @@
-const BRIDGE_VERSION = "Bridge v82.1";
-
-let modo = 0;
+const BRIDGE_VERSION = "Bridge v82.2";
 
 const panel = document.createElement("div");
 
@@ -15,15 +13,9 @@ panel.style.fontSize = "14px";
 panel.style.whiteSpace = "pre";
 panel.style.zIndex = "999999";
 
+panel.textContent = BRIDGE_VERSION + "\nbridge.js cargado";
+
 document.body.appendChild(panel);
-
-panel.onclick = () => {
-
-    modo++;
-
-    if (modo > 2) modo = 0;
-
-};
 
 function registrarBridge() {
 
@@ -33,52 +25,133 @@ function registrarBridge() {
 
         onProcessGpu(args) {
 
-            let texto =
+            const encontrados = [];
+
+            function explorar(obj, ruta, nivel) {
+
+                if (!obj) return;
+                if (nivel > 8) return;
+
+                const tipo = typeof obj;
+
+                if (tipo !== "object" && tipo !== "function") return;
+
+                let claves;
+
+                try {
+
+                    claves = Object.keys(obj);
+
+                } catch {
+
+                    return;
+
+                }
+
+                for (const k of claves) {
+
+                    let v;
+
+                    try {
+
+                        v = obj[k];
+
+                    } catch {
+
+                        continue;
+
+                    }
+
+                    const r = ruta + "." + k;
+
+                    const nombre = k.toLowerCase();
+
+                    if (
+                        nombre.includes("pose") ||
+                        nombre.includes("matrix") ||
+                        nombre.includes("camera") ||
+                        nombre.includes("view") ||
+                        nombre.includes("projection") ||
+                        nombre.includes("world") ||
+                        nombre.includes("target") ||
+                        nombre.includes("transform") ||
+                        nombre.includes("tracking")
+                    ) {
+
+                        encontrados.push("KEY  " + r);
+
+                    }
+
+                    if (Array.isArray(v) && v.length === 16) {
+
+                        encontrados.push("A16  " + r);
+
+                    }
+
+                    if (v instanceof Float32Array && v.length === 16) {
+
+                        encontrados.push("F32  " + r);
+
+                    }
+
+                    if (
+                        v &&
+                        typeof v === "object" &&
+                        "x" in v &&
+                        "y" in v &&
+                        "z" in v
+                    ) {
+
+                        encontrados.push("XYZ  " + r);
+
+                    }
+
+                    if (
+                        v &&
+                        typeof v === "object" &&
+                        "position" in v
+                    ) {
+
+                        encontrados.push("POS  " + r);
+
+                    }
+
+                    if (
+                        v &&
+                        typeof v === "object" &&
+                        "rotation" in v
+                    ) {
+
+                        encontrados.push("ROT  " + r);
+
+                    }
+
+                    if (
+                        v &&
+                        typeof v === "object" &&
+                        "scale" in v
+                    ) {
+
+                        encontrados.push("SCA  " + r);
+
+                    }
+
+                    explorar(v, r, nivel + 1);
+
+                    if (encontrados.length > 120) return;
+
+                }
+
+            }
+
+            explorar(args, "ARGS", 0);
+
+            explorar(window.XR8, "XR8", 0);
+
+            panel.textContent =
                 BRIDGE_VERSION +
-                "\n\nModo " + modo + "\n\n";
-
-            if (!args) {
-
-                panel.textContent = texto + "Sin args";
-                return;
-
-            }
-
-            if (modo === 0) {
-
-                texto += Object.keys(args).join("\n");
-
-            }
-
-            if (modo === 1) {
-
-                if (args.frameStartResult) {
-
-                    texto += Object.keys(args.frameStartResult).join("\n");
-
-                } else {
-
-                    texto += "Sin frameStartResult";
-
-                }
-
-            }
-
-            if (modo === 2) {
-
-                if (args.frameworkStartResult) {
-
-                    texto += Object.keys(args.frameworkStartResult).join("\n");
-
-                } else {
-
-                    texto += "Sin frameworkStartResult";
-
-                }
-
-            }
-
-            panel.textContent = texto;
+                "\n\n" +
+                encontrados.slice(0, 120).join("\n");
 
         }
 
