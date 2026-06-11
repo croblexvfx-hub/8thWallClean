@@ -1,4 +1,4 @@
-const BRIDGE_VERSION = "Bridge v81.9";
+const BRIDGE_VERSION = "Bridge v81.10";
 
 const panel = document.createElement("div");
 
@@ -19,7 +19,7 @@ panel.textContent =
     "bridge.js cargado";
 
 document.body.appendChild(panel);
-window.addEventListener("xrloaded", () => {
+function registrarBridge() {
 
     XR8.addCameraPipelineModule({
 
@@ -105,6 +105,16 @@ window.addEventListener("xrloaded", () => {
 
 }
 
-    });
+       });
 
-});
+}
+
+if (window.XR8) {
+
+    registrarBridge();
+
+} else {
+
+    window.addEventListener("xrloaded", registrarBridge);
+
+}
