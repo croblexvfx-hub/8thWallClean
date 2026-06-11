@@ -1,4 +1,4 @@
-const BRIDGE_VERSION = "Bridge v81.3";
+const BRIDGE_VERSION = "Bridge v81.4";
 const INSPECT = [
     { nombre: "XR8", objeto: () => window.XR8 },
     { nombre: "XR8.XrController", objeto: () => window.XR8?.XrController },
@@ -72,8 +72,9 @@ window.addEventListener("xrloaded", () => {
 
         onProcessGpu() {
             panel.textContent =
-                BRIDGE_VERSION +
-                "\n\nonProcessGpu";
+    BRIDGE_VERSION +
+    "\n\nGPU OK\n\n" +
+    "Time: " + Date.now();
         }
 
     });
