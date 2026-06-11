@@ -1,4 +1,4 @@
-const BRIDGE_VERSION = "Bridge v82.5";
+const BRIDGE_VERSION = "Bridge v82.6";
 
 const panel = document.createElement("div");
 
@@ -9,7 +9,7 @@ panel.style.background = "rgba(0,0,0,0.75)";
 panel.style.color = "lime";
 panel.style.padding = "10px";
 panel.style.fontFamily = "monospace";
-panel.style.fontSize = "14px";
+panel.style.fontSize = "13px";
 panel.style.whiteSpace = "pre-wrap";
 panel.style.maxWidth = "95vw";
 panel.style.maxHeight = "95vh";
@@ -22,74 +22,82 @@ document.body.appendChild(panel);
 
 function registrarBridge() {
 
-    try {
+    XR8.addCameraPipelineModule({
 
-        const original = XR8.XrController.pipelineModule;
+        name: "bridge-deep-scan",
 
-        XR8.XrController.pipelineModule = function (...args) {
+        onProcessGpu(...args) {
 
-            const pm = original.apply(this, args);
+            const encontrados = [];
+            const visitados = new WeakSet();
 
-            let ultimoTexto = "";
+            function explorar(obj, ruta, nivel) {
 
-            function resumir(obj, ruta, nivel) {
-
-                if (nivel > 5) return;
+                if (encontrados.length >= 30) return;
+                if (nivel > 8) return;
                 if (!obj) return;
-                if (typeof obj !== "object") return;
 
-                for (const k in obj) {
+                const tipo = typeof obj;
+
+                if (tipo !== "object" && tipo !== "function") return;
+
+                if (visitados.has(obj)) return;
+                visitados.add(obj);
+
+                let claves;
+
+                try {
+
+                    claves = Object.keys(obj);
+
+                } catch {
+
+                    return;
+
+                }
+
+                for (const k of claves) {
+
+                    if (encontrados.length >= 30) return;
 
                     let v;
 
                     try {
+
                         v = obj[k];
+
                     } catch {
+
                         continue;
+
                     }
 
                     const r = ruta + "." + k;
+                    const n = k.toLowerCase();
 
-                    const nombre = k.toLowerCase();
+                    // ---------- NOMBRES INTERESANTES ----------
 
                     if (
-                        nombre.includes("pose") ||
-                        nombre.includes("position") ||
-                        nombre.includes("rotation") ||
-                        nombre.includes("matrix") ||
-                        nombre.includes("transform") ||
-                        nombre.includes("camera") ||
-                        nombre.includes("projection") ||
-                        nombre.includes("view") ||
-                        nombre.includes("origin") ||
-                        nombre.includes("facing")
+                        n.includes("pose") ||
+                        n.includes("position") ||
+                        n.includes("rotation") ||
+                        n.includes("quaternion") ||
+                        n.includes("matrix") ||
+                        n.includes("transform") ||
+                        n.includes("world") ||
+                        n.includes("view") ||
+                        n.includes("projection") ||
+                        n.includes("origin") ||
+                        n.includes("facing") ||
+                        n.includes("camera") ||
+                        n.includes("target")
                     ) {
 
-                        ultimoTexto += r + "\n";
-
-                        try {
-
-                            if (
-                                v instanceof Float32Array ||
-                                Array.isArray(v)
-                            ) {
-
-                                ultimoTexto +=
-                                    JSON.stringify(
-                                        Array.from(v).slice(0, 16)
-                                    ) + "\n\n";
-
-                            } else {
-
-                                ultimoTexto +=
-                                    JSON.stringify(v, null, 2) +
-                                    "\n\n";
-
-                            }
-
-                        } catch {}
+                        encontrados.push("KEY\n" + r);
 
                     }
+
+                    // ---------- XYZ ----------
 
                     if (
                         v &&
@@ -99,39 +107,81 @@ function registrarBridge() {
                         "z" in v
                     ) {
 
-                        ultimoTexto +=
+                        encontrados.push(
+                            "XYZ\n" +
                             r +
-                            " = " +
-                            JSON.stringify(v) +
-                            "\n\n";
+                            "\n" +
+                            JSON.stringify(v)
+                        );
 
                     }
 
-                    resumir(v, r, nivel + 1);
+                    // ---------- XYZW ----------
+
+                    if (
+                        v &&
+                        typeof v === "object" &&
+                        "x" in v &&
+                        "y" in v &&
+                        "z" in v &&
+                        "w" in v
+                    ) {
+
+                        encontrados.push(
+                            "XYZW\n" +
+                            r +
+                            "\n" +
+                            JSON.stringify(v)
+                        );
+
+                    }
+
+                    // ---------- MATRICES ----------
+
+                    if (Array.isArray(v) && (v.length === 16 || v.length === 9)) {
+
+                        encontrados.push(
+                            "ARRAY\n" +
+                            r +
+                            "\nlen=" +
+                            v.length
+                        );
+
+                    }
+
+                    if (v instanceof Float32Array && (v.length === 16 || v.length === 9)) {
+
+                        encontrados.push(
+                            "FLOAT32\n" +
+                            r +
+                            "\nlen=" +
+                            v.length
+                        );
+
+                    }
+
+                    explorar(v, r, nivel + 1);
 
                 }
 
             }
 
-            resumir(pm, "pipeline", 0);
+            if (args.length > 0) {
+
+                explorar(args[0], "ARGS", 0);
+
+            }
 
             panel.textContent =
                 BRIDGE_VERSION +
-                "\n\nPIPELINE\n\n" +
-                (ultimoTexto || "(sin coincidencias)");
+                "\n\n" +
+                (encontrados.length
+                    ? encontrados.join("\n\n----------------\n\n")
+                    : "SIN HALLAZGOS");
 
-            return pm;
+        }
 
-        };
-
-    } catch (e) {
-
-        panel.textContent =
-            BRIDGE_VERSION +
-            "\n\nERROR\n\n" +
-            e.message;
-
-    }
+    });
 
 }
 
