@@ -1,4 +1,4 @@
-const BRIDGE_VERSION = "Bridge v81.6";
+const BRIDGE_VERSION = "Bridge v81.7";
 const INSPECT = [
     { nombre: "XR8", objeto: () => window.XR8 },
     { nombre: "XR8.XrController", objeto: () => window.XR8?.XrController },
@@ -116,11 +116,17 @@ panel.onclick = () => {
 
     try {
 
-    texto += Object.keys(args[0].frameStartResult).join("\n");
+    texto += Object.keys(args[0]).join("\n");
+
+    texto += "\n\n";
+
+    texto += "framework:\n";
+
+    texto += Object.keys(args[0].framework).join("\n");
 
 } catch (e) {
 
-    texto += "frameStartResult no accesible";
+    texto += "ERROR";
 
 }
 
