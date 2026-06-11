@@ -1,4 +1,4 @@
-const BRIDGE_VERSION = "Bridge v82.2";
+const BRIDGE_VERSION = "Bridge v82.3";
 
 const panel = document.createElement("div");
 
@@ -19,143 +19,93 @@ document.body.appendChild(panel);
 
 function registrarBridge() {
 
-    XR8.addCameraPipelineModule({
+    // --------- TORRE 1: Hook de updateCameraProjectionMatrix ---------
 
-        name: "bridge-test",
+    try {
 
-        onProcessGpu(args) {
+        const original = XR8.XrController.updateCameraProjectionMatrix;
 
-            const encontrados = [];
+        XR8.XrController.updateCameraProjectionMatrix = function (...args) {
 
-            function explorar(obj, ruta, nivel) {
-
-                if (!obj) return;
-                if (nivel > 8) return;
-
-                const tipo = typeof obj;
-
-                if (tipo !== "object" && tipo !== "function") return;
-
-                let claves;
-
-                try {
-
-                    claves = Object.keys(obj);
-
-                } catch {
-
-                    return;
-
-                }
-
-                for (const k of claves) {
-
-                    let v;
-
-                    try {
-
-                        v = obj[k];
-
-                    } catch {
-
-                        continue;
-
-                    }
-
-                    const r = ruta + "." + k;
-
-                    const nombre = k.toLowerCase();
-
-                    if (
-                        nombre.includes("pose") ||
-                        nombre.includes("matrix") ||
-                        nombre.includes("camera") ||
-                        nombre.includes("view") ||
-                        nombre.includes("projection") ||
-                        nombre.includes("world") ||
-                        nombre.includes("target") ||
-                        nombre.includes("transform") ||
-                        nombre.includes("tracking")
-                    ) {
-
-                        encontrados.push("KEY  " + r);
-
-                    }
-
-                    if (Array.isArray(v) && v.length === 16) {
-
-                        encontrados.push("A16  " + r);
-
-                    }
-
-                    if (v instanceof Float32Array && v.length === 16) {
-
-                        encontrados.push("F32  " + r);
-
-                    }
-
-                    if (
-                        v &&
-                        typeof v === "object" &&
-                        "x" in v &&
-                        "y" in v &&
-                        "z" in v
-                    ) {
-
-                        encontrados.push("XYZ  " + r);
-
-                    }
-
-                    if (
-                        v &&
-                        typeof v === "object" &&
-                        "position" in v
-                    ) {
-
-                        encontrados.push("POS  " + r);
-
-                    }
-
-                    if (
-                        v &&
-                        typeof v === "object" &&
-                        "rotation" in v
-                    ) {
-
-                        encontrados.push("ROT  " + r);
-
-                    }
-
-                    if (
-                        v &&
-                        typeof v === "object" &&
-                        "scale" in v
-                    ) {
-
-                        encontrados.push("SCA  " + r);
-
-                    }
-
-                    explorar(v, r, nivel + 1);
-
-                    if (encontrados.length > 120) return;
-
-                }
-
-            }
-
-            explorar(args, "ARGS", 0);
-
-            explorar(window.XR8, "XR8", 0);
-
-            panel.textContent =
+            let texto =
                 BRIDGE_VERSION +
-                "\n\n" +
-                encontrados.slice(0, 120).join("\n");
+                "\n\nupdateCameraProjectionMatrix\n\n";
 
-        }
+            texto += "args = " + args.length + "\n\n";
 
-    });
+            args.forEach((a, i) => {
+
+                texto += "[" + i + "] ";
+
+                if (a instanceof Float32Array) {
+
+                    texto +=
+                        "Float32Array(" +
+                        a.length +
+                        ")\n";
+
+                } else if (Array.isArray(a)) {
+
+                    texto +=
+                        "Array(" +
+                        a.length +
+                        ")\n";
+
+                } else if (a && typeof a === "object") {
+
+                    texto +=
+                        "Object: " +
+                        Object.keys(a).slice(0, 15).join(", ") +
+                        "\n";
+
+                } else {
+
+                    texto +=
+                        typeof a +
+                        " = " +
+                        a +
+                        "\n";
+
+                }
+
+            });
+
+            panel.textContent = texto;
+
+            return original.apply(this, args);
+
+        };
+
+    } catch (e) {
+
+        panel.textContent =
+            BRIDGE_VERSION +
+            "\n\nHOOK ERROR\n\n" +
+            e.message;
+
+    }
+
+    // --------- TORRE 2: Estado de XrConfig.camera ---------
+
+    setInterval(() => {
+
+        if (!XR8.XrConfig || !XR8.XrConfig.camera) return;
+
+        try {
+
+            const cam = XR8.XrConfig.camera;
+
+            let texto =
+                BRIDGE_VERSION +
+                "\n\nXR8.XrConfig.camera\n\n";
+
+            texto += Object.keys(cam).join("\n");
+
+            panel.textContent = texto;
+
+        } catch {}
+
+    }, 1000);
 
 }
 
