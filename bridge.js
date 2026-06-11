@@ -1,4 +1,4 @@
-const BRIDGE_VERSION = "Bridge v82.3";
+const BRIDGE_VERSION = "Bridge v82.5";
 
 const panel = document.createElement("div");
 
@@ -10,7 +10,10 @@ panel.style.color = "lime";
 panel.style.padding = "10px";
 panel.style.fontFamily = "monospace";
 panel.style.fontSize = "14px";
-panel.style.whiteSpace = "pre";
+panel.style.whiteSpace = "pre-wrap";
+panel.style.maxWidth = "95vw";
+panel.style.maxHeight = "95vh";
+panel.style.overflow = "auto";
 panel.style.zIndex = "999999";
 
 panel.textContent = BRIDGE_VERSION + "\nbridge.js cargado";
@@ -19,60 +22,105 @@ document.body.appendChild(panel);
 
 function registrarBridge() {
 
-    // --------- TORRE 1: Hook de updateCameraProjectionMatrix ---------
-
     try {
 
-        const original = XR8.XrController.updateCameraProjectionMatrix;
+        const original = XR8.XrController.pipelineModule;
 
-        XR8.XrController.updateCameraProjectionMatrix = function (...args) {
+        XR8.XrController.pipelineModule = function (...args) {
 
-            let texto =
-                BRIDGE_VERSION +
-                "\n\nupdateCameraProjectionMatrix\n\n";
+            const pm = original.apply(this, args);
 
-            texto += "args = " + args.length + "\n\n";
+            let ultimoTexto = "";
 
-            args.forEach((a, i) => {
+            function resumir(obj, ruta, nivel) {
 
-                texto += "[" + i + "] ";
+                if (nivel > 5) return;
+                if (!obj) return;
+                if (typeof obj !== "object") return;
 
-                if (a instanceof Float32Array) {
+                for (const k in obj) {
 
-                    texto +=
-                        "Float32Array(" +
-                        a.length +
-                        ")\n";
+                    let v;
 
-                } else if (Array.isArray(a)) {
+                    try {
+                        v = obj[k];
+                    } catch {
+                        continue;
+                    }
 
-                    texto +=
-                        "Array(" +
-                        a.length +
-                        ")\n";
+                    const r = ruta + "." + k;
 
-                } else if (a && typeof a === "object") {
+                    const nombre = k.toLowerCase();
 
-                    texto +=
-                        "Object: " +
-                        Object.keys(a).slice(0, 15).join(", ") +
-                        "\n";
+                    if (
+                        nombre.includes("pose") ||
+                        nombre.includes("position") ||
+                        nombre.includes("rotation") ||
+                        nombre.includes("matrix") ||
+                        nombre.includes("transform") ||
+                        nombre.includes("camera") ||
+                        nombre.includes("projection") ||
+                        nombre.includes("view") ||
+                        nombre.includes("origin") ||
+                        nombre.includes("facing")
+                    ) {
 
-                } else {
+                        ultimoTexto += r + "\n";
 
-                    texto +=
-                        typeof a +
-                        " = " +
-                        a +
-                        "\n";
+                        try {
+
+                            if (
+                                v instanceof Float32Array ||
+                                Array.isArray(v)
+                            ) {
+
+                                ultimoTexto +=
+                                    JSON.stringify(
+                                        Array.from(v).slice(0, 16)
+                                    ) + "\n\n";
+
+                            } else {
+
+                                ultimoTexto +=
+                                    JSON.stringify(v, null, 2) +
+                                    "\n\n";
+
+                            }
+
+                        } catch {}
+
+                    }
+
+                    if (
+                        v &&
+                        typeof v === "object" &&
+                        "x" in v &&
+                        "y" in v &&
+                        "z" in v
+                    ) {
+
+                        ultimoTexto +=
+                            r +
+                            " = " +
+                            JSON.stringify(v) +
+                            "\n\n";
+
+                    }
+
+                    resumir(v, r, nivel + 1);
 
                 }
 
-            });
+            }
 
-            panel.textContent = texto;
+            resumir(pm, "pipeline", 0);
 
-            return original.apply(this, args);
+            panel.textContent =
+                BRIDGE_VERSION +
+                "\n\nPIPELINE\n\n" +
+                (ultimoTexto || "(sin coincidencias)");
+
+            return pm;
 
         };
 
@@ -80,32 +128,10 @@ function registrarBridge() {
 
         panel.textContent =
             BRIDGE_VERSION +
-            "\n\nHOOK ERROR\n\n" +
+            "\n\nERROR\n\n" +
             e.message;
 
     }
-
-    // --------- TORRE 2: Estado de XrConfig.camera ---------
-
-    setInterval(() => {
-
-        if (!XR8.XrConfig || !XR8.XrConfig.camera) return;
-
-        try {
-
-            const cam = XR8.XrConfig.camera;
-
-            let texto =
-                BRIDGE_VERSION +
-                "\n\nXR8.XrConfig.camera\n\n";
-
-            texto += Object.keys(cam).join("\n");
-
-            panel.textContent = texto;
-
-        } catch {}
-
-    }, 1000);
 
 }
 
