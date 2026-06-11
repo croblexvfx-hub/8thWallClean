@@ -1,4 +1,4 @@
-const BRIDGE_VERSION = "Bridge v81.10";
+const BRIDGE_VERSION = "Bridge v81.11";
 
 const panel = document.createElement("div");
 
@@ -20,6 +20,25 @@ panel.textContent =
 
 document.body.appendChild(panel);
 function registrarBridge() {
+
+    try {
+
+    const pm = XR8.XrController.pipelineModule();
+
+    panel.textContent =
+        BRIDGE_VERSION +
+        "\n\n" +
+        Object.keys(pm).join("\n");
+
+} catch (e) {
+
+    panel.textContent =
+        BRIDGE_VERSION +
+        "\n\nERROR\n" +
+        e.message;
+
+}
+    return;
 
     XR8.addCameraPipelineModule({
 
