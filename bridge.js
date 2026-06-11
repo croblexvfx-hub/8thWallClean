@@ -1,66 +1,67 @@
-const BRIDGE_VERSION = "Bridge v82.9";
+const BRIDGE_VERSION = "Bridge v83.0 (pipeline tracker)";
 
 const panel = document.createElement("div");
 
 panel.style.position = "fixed";
-panel.style.top = "20px";
+panel.style.top = "10px";
 panel.style.left = "10px";
-panel.style.background = "rgba(0,0,0,0.80)";
+panel.style.background = "rgba(0,0,0,0.85)";
 panel.style.color = "lime";
 panel.style.padding = "10px";
 panel.style.fontFamily = "monospace";
 panel.style.fontSize = "12px";
 panel.style.whiteSpace = "pre";
 panel.style.zIndex = "999999";
-panel.style.maxWidth = "45vw";
-panel.style.maxHeight = "80vh";
+panel.style.maxHeight = "85vh";
 panel.style.overflow = "auto";
 
-if (document.body) {
-    document.body.appendChild(panel);
-} else {
-    document.addEventListener("DOMContentLoaded", () => {
-        document.body.appendChild(panel);
-    });
+document.body.appendChild(panel);
+
+let lastFrame = null;
+
+function formatMat4(m) {
+    if (!m || m.length !== 16) return "no matrix";
+    return m.map(v => v.toFixed(3)).join(", ");
 }
 
-function safeKeys(obj) {
-    try {
-        if (!obj) return [];
-        return Object.getOwnPropertyNames(obj);
-    } catch {
-        return [];
-    }
-}
+window.addEventListener("xrloaded", () => {
+
+    XR8.addCameraPipelineModule({
+        name: "bridge-tracker",
+
+        onUpdate: ({processCpuResult}) => {
+
+            const cam = processCpuResult?.camera;
+
+            if (!cam) return;
+
+            lastFrame = {
+                pos: cam?.transform?.position || null,
+                rot: cam?.transform?.rotation || null,
+                intrinsics: cam?.intrinsics || null,
+                timestamp: Date.now()
+            };
+        }
+    });
+});
 
 setInterval(() => {
 
-    let out = BRIDGE_VERSION + "\n";
+    let out = BRIDGE_VERSION + "\n\n";
 
-    try {
-
-        if (!window.XR8) {
-            panel.textContent = out + "\nXR8 not found";
-            return;
-        }
-
-        out += "\nXR8 OK";
-
-        const controller = window.XR8.XrController;
-
-        if (!controller) {
-            panel.textContent = out + "\nXrController not ready";
-            return;
-        }
-
-        const keys = safeKeys(controller);
-
-        out += "\n\nController keys:\n" + keys.slice(0, 40).join(", ");
-
-    } catch (e) {
-        out += "\nERROR: " + e.message;
+    if (!lastFrame) {
+        panel.textContent = out + "waiting for XR frame...";
+        return;
     }
+
+    out += "CAMERA POSITION:\n";
+    out += JSON.stringify(lastFrame.pos, null, 2) + "\n\n";
+
+    out += "CAMERA ROTATION:\n";
+    out += JSON.stringify(lastFrame.rot, null, 2) + "\n\n";
+
+    out += "TIMESTAMP:\n" + lastFrame.timestamp;
 
     panel.textContent = out;
 
-}, 500);
+}, 200);
