@@ -1,4 +1,4 @@
-const BRIDGE_VERSION = "Bridge v81.12";
+const BRIDGE_VERSION = "Bridge v81.14";
 
 const panel = document.createElement("div");
 
@@ -144,10 +144,6 @@ function explorar(obj, ruta, nivel) {
             encontrados.join("\n");
             
         }
-
-    panel.textContent = texto;
-
-}
 
        });
 
