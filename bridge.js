@@ -1,4 +1,4 @@
-const BRIDGE_VERSION = "Bridge v81.2";
+const BRIDGE_VERSION = "Bridge v81.3";
 const INSPECT = [
     { nombre: "XR8", objeto: () => window.XR8 },
     { nombre: "XR8.XrController", objeto: () => window.XR8?.XrController },
@@ -82,10 +82,47 @@ window.addEventListener("xrloaded", () => {
 panel.style.cursor = "pointer";
 
 panel.onclick = () => {
-    inspectIndex++;
-    if (inspectIndex >= INSPECT.length) inspectIndex = 0;
+
+    panel.textContent =
+        BRIDGE_VERSION +
+        "\n\nCLICK";
+
+    try {
+
+        XR8.addCameraPipelineModule({
+
+            name: "bridge-click-test",
+
+            onStart() {
+                panel.textContent = BRIDGE_VERSION + "\n\nonStart";
+            },
+
+            onUpdate() {
+                panel.textContent = BRIDGE_VERSION + "\n\nonUpdate";
+            },
+
+            onProcessCpu() {
+                panel.textContent = BRIDGE_VERSION + "\n\nonProcessCpu";
+            },
+
+            onProcessGpu() {
+                panel.textContent = BRIDGE_VERSION + "\n\nonProcessGpu";
+            }
+
+        });
+
+    } catch (e) {
+
+        panel.textContent =
+            BRIDGE_VERSION +
+            "\n\nERROR:\n" +
+            e.message;
+
+    }
+
 };
 
+/*
 setInterval(() => {
 
     let texto = BRIDGE_VERSION + "\n\n";
@@ -123,3 +160,4 @@ if (typeof obj === "function") {
     panel.textContent = texto;
 
 }, 250);
+*/
