@@ -1,4 +1,4 @@
-const BRIDGE_VERSION = "Bridge v82.8";
+const BRIDGE_VERSION = "Bridge v82.9";
 
 const panel = document.createElement("div");
 
@@ -16,83 +16,51 @@ panel.style.maxWidth = "45vw";
 panel.style.maxHeight = "80vh";
 panel.style.overflow = "auto";
 
-document.addEventListener("DOMContentLoaded", () => {
+if (document.body) {
     document.body.appendChild(panel);
-});
+} else {
+    document.addEventListener("DOMContentLoaded", () => {
+        document.body.appendChild(panel);
+    });
+}
 
-function safeInspect(obj, maxKeys = 20) {
-    let keys = [];
-
+function safeKeys(obj) {
     try {
-        keys = Object.getOwnPropertyNames(obj || {});
-    } catch (e) {
-        return ["[Object.getOwnPropertyNames failed] " + e.message];
+        if (!obj) return [];
+        return Object.getOwnPropertyNames(obj);
+    } catch {
+        return [];
     }
-
-    if (!keys.length) {
-        try {
-            for (const k in obj) {
-                keys.push(k);
-                if (keys.length >= maxKeys) break;
-            }
-        } catch (e) {
-            return ["[for...in failed] " + e.message];
-        }
-    }
-
-    return keys.slice(0, maxKeys);
 }
 
-function getXR8() {
-    return window.XR8;
-}
-
-function tick() {
+setInterval(() => {
 
     let out = BRIDGE_VERSION + "\n";
 
     try {
-        const XR8ref = getXR8();
 
-        if (!XR8ref) {
-            panel.textContent = out + "\nXR8 not found yet...";
+        if (!window.XR8) {
+            panel.textContent = out + "\nXR8 not found";
             return;
         }
 
-        out += "\nXR8 OK\n";
+        out += "\nXR8 OK";
 
-        const controller = XR8ref.XrController;
+        const controller = window.XR8.XrController;
 
         if (!controller) {
             panel.textContent = out + "\nXrController not ready";
             return;
         }
 
-        out += "\nXrController:\n";
+        const keys = safeKeys(controller);
 
-        const keys = safeInspect(controller, 30);
-
-        out += keys.join(", ") + "\n";
-
-        // intentar profundizar un nivel si hay objetos dentro
-        for (const k of keys.slice(0, 5)) {
-            try {
-                const v = controller[k];
-
-                if (v && typeof v === "object") {
-                    const sub = safeInspect(v, 10);
-                    out += `\n- ${k} -> ${sub.join(", ")}`;
-                }
-            } catch (e) {
-                out += `\n- ${k} -> error`;
-            }
-        }
+        out += "\n\nController keys:\n" + keys.slice(0, 40).join(", ");
 
     } catch (e) {
-        out += "\nFATAL: " + e.message;
+        out += "\nERROR: " + e.message;
     }
 
     panel.textContent = out;
-}
 
-setInterval(tick, 500);
+}, 500);
