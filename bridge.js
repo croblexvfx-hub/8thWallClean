@@ -1,4 +1,4 @@
-const BRIDGE_VERSION = "Bridge v81.1";
+const BRIDGE_VERSION = "Bridge v81.2";
 const INSPECT = [
     { nombre: "XR8", objeto: () => window.XR8 },
     { nombre: "XR8.XrController", objeto: () => window.XR8?.XrController },
@@ -34,6 +34,51 @@ panel.textContent =
     "bridge.js cargado";
 
 document.body.appendChild(panel);
+window.addEventListener("xrloaded", () => {
+
+    XR8.addCameraPipelineModule({
+
+        name: "bridge-test",
+
+        onStart() {
+            panel.textContent =
+                BRIDGE_VERSION +
+                "\n\nonStart";
+        },
+
+        onAttach() {
+            panel.textContent =
+                BRIDGE_VERSION +
+                "\n\nonAttach";
+        },
+
+        onDetach() {
+            panel.textContent =
+                BRIDGE_VERSION +
+                "\n\nonDetach";
+        },
+
+        onUpdate() {
+            panel.textContent =
+                BRIDGE_VERSION +
+                "\n\nonUpdate";
+        },
+
+        onProcessCpu() {
+            panel.textContent =
+                BRIDGE_VERSION +
+                "\n\nonProcessCpu";
+        },
+
+        onProcessGpu() {
+            panel.textContent =
+                BRIDGE_VERSION +
+                "\n\nonProcessGpu";
+        }
+
+    });
+
+});
 panel.style.cursor = "pointer";
 
 panel.onclick = () => {
