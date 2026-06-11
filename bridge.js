@@ -1,4 +1,4 @@
-const BRIDGE_VERSION = "Bridge v83.1 (REAL pipeline hook)";
+const BRIDGE_VERSION = "Bridge v84.0 (clean export)";
 
 const panel = document.createElement("div");
 panel.style.position = "fixed";
@@ -13,13 +13,36 @@ panel.style.whiteSpace = "pre";
 panel.style.zIndex = "999999";
 panel.style.maxHeight = "85vh";
 panel.style.overflow = "auto";
+
 document.body.appendChild(panel);
 
-let last = {
-    cam: null,
-    reality: null,
-    t: 0
+let state = {
+    camera: null,
+    marker: null,
+    intrinsics: null,
+    tracking: "waiting"
 };
+
+function normalizeMarker(reality) {
+
+    const img = reality?.detectedImages?.[0];
+    if (!img) return null;
+
+    return {
+        position: img.position || null,
+        rotation: img.rotation || null,
+        scale: img.scale || 1,
+        name: img.name
+    };
+}
+
+function extractCamera(reality) {
+
+    return {
+        rotation: reality?.rotation || null,
+        position: reality?.position || null
+    };
+}
 
 function install() {
 
@@ -29,42 +52,38 @@ function install() {
     }
 
     XR8.addCameraPipelineModule({
-        name: "bridge-capture",
+        name: "bridge-exporter",
 
-        onUpdate: (data) => {
+        onUpdate: ({ processCpuResult }) => {
 
-            const cpu = data?.processCpuResult;
+            const reality = processCpuResult?.reality;
 
-            if (!cpu) return;
+            if (!reality) return;
 
-            last.cam = cpu.camera || null;
-            last.reality = cpu.reality || null;
-            last.t = performance.now();
+            state.camera = extractCamera(reality);
+            state.marker = normalizeMarker(reality);
+            state.intrinsics = reality.intrinsics || null;
+            state.tracking = reality.trackingStatus || "unknown";
         }
     });
 
-    panel.textContent = BRIDGE_VERSION + "\ninstalled pipeline module ✔";
+    panel.textContent = BRIDGE_VERSION + "\ninstalled ✔";
 }
 
 function render() {
 
     let out = BRIDGE_VERSION + "\n\n";
 
-    if (!last.cam && !last.reality) {
-        panel.textContent = out + "NO FRAME DATA YET";
-        return;
-    }
+    out += "TRACKING: " + state.tracking + "\n\n";
 
-    out += "CAMERA:\n";
-    out += JSON.stringify(last.cam, null, 2) + "\n\n";
+    out += "CAMERA:\n" + JSON.stringify(state.camera, null, 2) + "\n\n";
 
-    out += "REALITY:\n";
-    out += JSON.stringify(last.reality, null, 2) + "\n\n";
+    out += "MARKER:\n" + JSON.stringify(state.marker, null, 2) + "\n\n";
 
-    out += "t=" + last.t;
+    out += "INTRINSICS:\n" + JSON.stringify(state.intrinsics, null, 2);
 
     panel.textContent = out;
 }
 
 install();
-setInterval(render, 200);
+setInterval(render, 150);
