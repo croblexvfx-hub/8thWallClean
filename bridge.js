@@ -28,7 +28,9 @@ function registrarBridge() {
     panel.textContent =
         BRIDGE_VERSION +
         "\n\n" +
-        Object.keys(pm).join("\n");
+       "typeof: " + typeof pm +
+"\n\n" +
+(pm.toString ? pm.toString().substring(0,500) : "sin toString");
 
 } catch (e) {
 
