@@ -1,9 +1,12 @@
-const BRIDGE_VERSION = "Bridge v80.9";
+const BRIDGE_VERSION = "Bridge v81.0";
 const INSPECT = [
     { nombre: "XR8", objeto: () => window.XR8 },
     { nombre: "XR8.XrController", objeto: () => window.XR8?.XrController },
+    { nombre: "XR8.XrController.pipelineModule", objeto: () => window.XR8?.XrController?.pipelineModule },
     { nombre: "XR8.Threejs", objeto: () => window.XR8?.Threejs },
+    { nombre: "XR8.Threejs.pipelineModule", objeto: () => window.XR8?.Threejs?.pipelineModule },
     { nombre: "XR8.CameraPixelArray", objeto: () => window.XR8?.CameraPixelArray },
+    { nombre: "XR8.CameraPixelArray.pipelineModule", objeto: () => window.XR8?.CameraPixelArray?.pipelineModule },
     { nombre: "XR8.GlTextureRenderer", objeto: () => window.XR8?.GlTextureRenderer },
     { nombre: "XR8.Platform", objeto: () => window.XR8?.Platform },
     { nombre: "XR8.XrConfig", objeto: () => window.XR8?.XrConfig },
