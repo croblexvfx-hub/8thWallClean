@@ -1,4 +1,4 @@
-const BRIDGE_VERSION = "Bridge v82.6";
+const BRIDGE_VERSION = "Bridge v82.7";
 
 const panel = document.createElement("div");
 
@@ -9,188 +9,55 @@ panel.style.background = "rgba(0,0,0,0.75)";
 panel.style.color = "lime";
 panel.style.padding = "10px";
 panel.style.fontFamily = "monospace";
-panel.style.fontSize = "13px";
-panel.style.whiteSpace = "pre-wrap";
-panel.style.maxWidth = "95vw";
-panel.style.maxHeight = "95vh";
-panel.style.overflow = "auto";
+panel.style.fontSize = "14px";
+panel.style.whiteSpace = "pre";
 panel.style.zIndex = "999999";
-
-panel.textContent = BRIDGE_VERSION + "\nbridge.js cargado";
 
 document.body.appendChild(panel);
 
-function registrarBridge() {
+setInterval(() => {
 
-    XR8.addCameraPipelineModule({
+    let out = BRIDGE_VERSION + "\n\n";
 
-        name: "bridge-deep-scan",
+    try {
 
-        onProcessGpu(...args) {
+        const xc = XR8.XrController;
 
-            const encontrados = [];
-            const visitados = new WeakSet();
+        for (const k of Object.keys(xc)) {
 
-            function explorar(obj, ruta, nivel) {
+            try {
 
-                if (encontrados.length >= 30) return;
-                if (nivel > 8) return;
-                if (!obj) return;
+                const v = xc[k];
 
-                const tipo = typeof obj;
+                if (
+                    v &&
+                    typeof v === "object"
+                ) {
 
-                if (tipo !== "object" && tipo !== "function") return;
+                    const keys = Object.keys(v);
 
-                if (visitados.has(obj)) return;
-                visitados.add(obj);
+                    if (keys.length > 0) {
 
-                let claves;
+                        out +=
+                            k +
+                            "\n" +
+                            keys.slice(0,10).join(", ") +
+                            "\n\n";
 
-                try {
-
-                    claves = Object.keys(obj);
-
-                } catch {
-
-                    return;
+                    }
 
                 }
 
-                for (const k of claves) {
-
-                    if (encontrados.length >= 30) return;
-
-                    let v;
-
-                    try {
-
-                        v = obj[k];
-
-                    } catch {
-
-                        continue;
-
-                    }
-
-                    const r = ruta + "." + k;
-                    const n = k.toLowerCase();
-
-                    // ---------- NOMBRES INTERESANTES ----------
-
-                    if (
-                        n.includes("pose") ||
-                        n.includes("position") ||
-                        n.includes("rotation") ||
-                        n.includes("quaternion") ||
-                        n.includes("matrix") ||
-                        n.includes("transform") ||
-                        n.includes("world") ||
-                        n.includes("view") ||
-                        n.includes("projection") ||
-                        n.includes("origin") ||
-                        n.includes("facing") ||
-                        n.includes("camera") ||
-                        n.includes("target")
-                    ) {
-
-                        encontrados.push("KEY\n" + r);
-
-                    }
-
-                    // ---------- XYZ ----------
-
-                    if (
-                        v &&
-                        typeof v === "object" &&
-                        "x" in v &&
-                        "y" in v &&
-                        "z" in v
-                    ) {
-
-                        encontrados.push(
-                            "XYZ\n" +
-                            r +
-                            "\n" +
-                            JSON.stringify(v)
-                        );
-
-                    }
-
-                    // ---------- XYZW ----------
-
-                    if (
-                        v &&
-                        typeof v === "object" &&
-                        "x" in v &&
-                        "y" in v &&
-                        "z" in v &&
-                        "w" in v
-                    ) {
-
-                        encontrados.push(
-                            "XYZW\n" +
-                            r +
-                            "\n" +
-                            JSON.stringify(v)
-                        );
-
-                    }
-
-                    // ---------- MATRICES ----------
-
-                    if (Array.isArray(v) && (v.length === 16 || v.length === 9)) {
-
-                        encontrados.push(
-                            "ARRAY\n" +
-                            r +
-                            "\nlen=" +
-                            v.length
-                        );
-
-                    }
-
-                    if (v instanceof Float32Array && (v.length === 16 || v.length === 9)) {
-
-                        encontrados.push(
-                            "FLOAT32\n" +
-                            r +
-                            "\nlen=" +
-                            v.length
-                        );
-
-                    }
-
-                    explorar(v, r, nivel + 1);
-
-                }
-
-            }
-
-            if (args.length > 0) {
-
-                explorar(args[0], "ARGS", 0);
-
-            }
-
-            panel.textContent =
-                BRIDGE_VERSION +
-                "\n\n" +
-                (encontrados.length
-                    ? encontrados.join("\n\n----------------\n\n")
-                    : "SIN HALLAZGOS");
+            } catch {}
 
         }
 
-    });
+    } catch (e) {
 
-}
+        out += e.message;
 
-if (window.XR8) {
+    }
 
-    registrarBridge();
+    panel.textContent = out;
 
-} else {
-
-    window.addEventListener("xrloaded", registrarBridge);
-
-}
+}, 500);
