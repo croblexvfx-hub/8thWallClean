@@ -1,4 +1,4 @@
-const BRIDGE_VERSION = "Bridge v84.0 (clean export)";
+const BRIDGE_VERSION = "Bridge v84.1 (Tracking API)";
 
 const panel = document.createElement("div");
 panel.style.position = "fixed";
@@ -16,7 +16,11 @@ panel.style.overflow = "auto";
 
 document.body.appendChild(panel);
 
-let state = {
+// ===================================================================
+// TRACKING API GLOBAL
+// ===================================================================
+
+window.Tracking = {
     camera: null,
     marker: null,
     intrinsics: null,
@@ -52,6 +56,7 @@ function install() {
     }
 
     XR8.addCameraPipelineModule({
+
         name: "bridge-exporter",
 
         onUpdate: ({ processCpuResult }) => {
@@ -60,11 +65,12 @@ function install() {
 
             if (!reality) return;
 
-            state.camera = extractCamera(reality);
-            state.marker = normalizeMarker(reality);
-            state.intrinsics = reality.intrinsics || null;
-            state.tracking = reality.trackingStatus || "unknown";
+            window.Tracking.camera = extractCamera(reality);
+            window.Tracking.marker = normalizeMarker(reality);
+            window.Tracking.intrinsics = reality.intrinsics || null;
+            window.Tracking.tracking = reality.trackingStatus || "unknown";
         }
+
     });
 
     panel.textContent = BRIDGE_VERSION + "\ninstalled ✔";
@@ -74,13 +80,23 @@ function render() {
 
     let out = BRIDGE_VERSION + "\n\n";
 
-    out += "TRACKING: " + state.tracking + "\n\n";
+    out += "TRACKING: " + window.Tracking.tracking + "\n\n";
 
-    out += "CAMERA:\n" + JSON.stringify(state.camera, null, 2) + "\n\n";
+    out += "CAMERA:\n";
+    out += JSON.stringify(window.Tracking.camera, null, 2);
+    out += "\n\n";
 
-    out += "MARKER:\n" + JSON.stringify(state.marker, null, 2) + "\n\n";
+    out += "MARKER:\n";
+    out += JSON.stringify(window.Tracking.marker, null, 2);
+    out += "\n\n";
 
-    out += "INTRINSICS:\n" + JSON.stringify(state.intrinsics, null, 2);
+    out += "INTRINSICS:\n";
+    out += JSON.stringify(window.Tracking.intrinsics, null, 2);
+
+    out += "\n\n";
+
+    const video = document.querySelector("video");
+    out += "VIDEO: " + (video ? "YES" : "NO");
 
     panel.textContent = out;
 }
